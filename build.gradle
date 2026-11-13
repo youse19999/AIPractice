@@ -1,0 +1,48 @@
+allprojects {
+    apply plugin: 'eclipse'
+    apply plugin: 'idea'
+    repositories {
+        mavenCentral()
+    }
+}
+
+subprojects {
+    apply plugin: 'java-library'
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+    }
+}
+
+project(':core') {
+    dependencies {
+        api "com.badlogicgames.gdx:gdx:${gdxVersion}"
+    }
+}
+
+project(':lwjgl3') {
+    apply plugin: 'application'
+
+    dependencies {
+        implementation project(':core')
+        implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:${gdxVersion}"
+        runtimeOnly "com.badlogicgames.gdx:gdx-platform:${gdxVersion}:natives-desktop"
+    }
+
+    application {
+        mainClass = 'com.example.game.lwjgl3.Lwjgl3Launcher'
+    }
+
+    run {
+        workingDir = rootProject.file('assets')
+        if (System.getProperty('os.name').toLowerCase().contains('mac')) {
+            jvmArgs += '-XstartOnFirstThread'
+        }
+    }
+}
